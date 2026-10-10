@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ToyExpo — Календарь выставок Design Toy</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ToyExpo">
+  <link rel="apple-touch-icon" href="/icon.jpg">
+  <link rel="icon" href="/icon.jpg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0A0C14;
+      --surface: #131622;
+      --surface-elevated: #1B2032;
+      --border: #2B324D;
+      --text: #F3F4F8;
+      --text-muted: #9EA6C2;
+      --pink: #FF2A6D;
+      --cyan: #05D9E8;
+      --yellow: #D1F200;
+      --green: #26DE81;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow-x: hidden;
+      padding-bottom: calc(85px + env(safe-area-inset-bottom));
+      padding-top: env(safe-area-inset-top);
+      min-height: 100vh;
+    }
+    header {
+      padding: 16px 20px 8px;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--pink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: -0.5px;
+    }
+    .brand-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Hero Banner */
+    .hero-card {
+      position: relative;
+      margin: 12px 16px;
+      border-radius: 22px;
+      overflow: hidden;
+      height: 220px;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,42,109,0.3);
+    }
+    .hero-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(10,12,20,0.85) 60%, rgba(10,12,20,0.98) 100%);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--pink);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+      width: fit-content;
+    }
+    .hero-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .hero-sub {
+      font-size: 13px;
+      color: var(--yellow);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .countdown-grid {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .timer-box {
+      background: rgba(27,32,50,0.85);
+      border: 1px solid rgba(5,217,232,0.4);
+      border-radius: 10px;
+      padding: 4px 8px;
+      text-align: center;
+      min-width: 44px;
+    }
+    .timer-num {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .timer-lbl {
+      font-size: 8px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    /* Search & Filters */
+    .search-box {
+      margin: 8px 16px;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 16px 12px 42px;
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--cyan);
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      opacity: 0.7;
+    }
+    .scroll-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 6px 16px;
+      scrollbar-width: none;
+    }
+    .scroll-row::-webkit-scrollbar {
+      display: none;
+    }
+    .chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chip.active-cyan {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      color: #000;
+    }
+    .chip.active-pink {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: #fff;
+    }
+    .chip.active-yellow {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      color: #000;
+    }
+
+    /* Exhibition Cards */
+    .cards-container {
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .expo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.2s;
+    }
+    .expo-card:active {
+      transform: scale(0.985);
+    }
+    .expo-card.favorite {
+      border-color: rgba(255,42,109,0.6);
+    }
+    .expo-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .cat-pill {
+      background: var(--surface-elevated);
+      border: 1px solid rgba(5,217,232,0.4);
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+    .days-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+    .days-badge.now {
+      background: var(--pink);
+      color: #fff;
+    }
+    .days-badge.soon {
+      background: var(--yellow);
+      color: #000;
+    }
+    .days-badge.normal {
+      background: var(--surface-elevated);
+      color: var(--text-muted);
+    }
+    .fav-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+    .expo-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .expo-edition {
+      font-size: 13px;
+      color: var(--pink);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .expo-info-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .expo-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-top: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .artists-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .artist-tag {
+      background: var(--surface-elevated);
+      font-size: 11px;
+      color: var(--text);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(65px + env(safe-area-inset-bottom));
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      padding-top: 8px;
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      flex: 1;
+    }
+    .nav-item.active {
+      color: var(--pink);
+    }
+    .nav-item.active-yellow {
+      color: var(--yellow);
+    }
+    .nav-item.active-cyan {
+      color: var(--cyan);
+    }
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    /* Modal / Bottom Sheet */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      overflow-y: auto;
+      padding: 20px 16px calc(40px + env(safe-area-inset-bottom));
+    }
+    .modal.open {
+      display: block;
+    }
+    .modal-sheet {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--surface-elevated);
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--pink);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-yellow {
+      background: var(--yellow);
+      color: #000;
+    }
+    .guide-box {
+      background: rgba(209,242,0,0.08);
+      border: 1px solid var(--yellow);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 14px 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .drop-item-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .drop-item-card.grail {
+      border-color: rgba(209,242,0,0.6);
+    }
+
+    /* PWA iOS prompt */
+    .ios-pwa-bar {
+      background: linear-gradient(90deg, #FF2A6D, #8854D0);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ios-pwa-bar" id="iosPwaBar">
+    <span>📱 Добавьте на экран «Домой»: Поделиться ➔ На экран «Домой»</span>
+    <span style="cursor:pointer;" onclick="document.getElementById('iosPwaBar').style.display='none'">✕</span>
+  </div>
+
+  <header>
+    <div class="header-row">
+      <div>
+        <div class="brand-title">ToyExpo <span>👾</span></div>
+        <div class="brand-sub">Мировой календарь выставок дизайнерских игрушек</div>
+      </div>
+      <button class="btn btn-secondary" style="width:auto; padding: 6px 12px; font-size: 11px;" onclick="openAddExpoModal()">+ Выставка</button>
+    </div>
+  </header>
+
+  <div id="tgUserBar" style="display:none; align-items:center; justify-content:space-between; background:rgba(42,171,238,0.12); border:1px solid rgba(42,171,238,0.3); border-radius:12px; padding:8px 14px; margin: 0 16px 10px; font-size:12px; color:#2AABEE;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:16px;">👾</span>
+      <div>
+        <div style="font-weight:700; color:#fff;" id="tgUserName">Привет, Коллекционер!</div>
+        <div style="font-size:10px; color:#9EA6C2;">Telegram Mini App синхронизирован</div>
+      </div>
+    </div>
+    <span style="font-size:10px; font-weight:800; background:#2AABEE; color:#fff; padding:3px 8px; border-radius:100px;">TMA ACTIVE</span>
+  </div>
+
+  <!-- Hero Banner -->
+  <div class="hero-card" id="heroCard" onclick="openHeroDetails()">
+    <img src="/hero.jpg" alt="Toy Expo Hero" class="hero-img">
+    <div class="hero-overlay">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="hero-badge">⭐ БЛИЖАЙШИЙ МИРОВОЙ ЭКСПО</div>
+        <div style="font-size:12px; color:var(--cyan); font-weight:700;" id="heroCity">Анахайм, США</div>
+      </div>
+      <div>
+        <div class="hero-title" id="heroTitle">DesignerCon (D-Con)</div>
+        <div class="hero-sub" id="heroDates">2026 • 20 – 22 ноября 2026</div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+        <div class="countdown-grid" id="countdownGrid">
+          <div class="timer-box"><div class="timer-num" id="dDays">42</div><div class="timer-lbl">ДНЕЙ</div></div>
+          <div class="timer-box"><div class="timer-num" id="dHours">14</div><div class="timer-lbl">ЧАС</div></div>
+          <div class="timer-box"><div class="timer-num" id="dMins">30</div><div class="timer-lbl">МИН</div></div>
+          <div class="timer-box"><div class="timer-num" id="dSecs">00</div><div class="timer-lbl">СЕК</div></div>
+        </div>
+        <button class="btn" style="width:auto; padding:8px 14px; font-size:12px; margin:0;" onclick="event.stopPropagation(); openHeroDetails();">Дропы ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Поиск (Labubu, Coarse, WonFes, Токио, софуби)..." oninput="renderApp()">
+  </div>
+
+  <!-- Region Filters -->
+  <div class="scroll-row" id="regionFilters">
+    <div class="chip active-cyan" onclick="setRegion('ALL', this)">🌍 Все регионы</div>
+    <div class="chip" onclick="setRegion('ASIA', this)">⛩️ Азия</div>
+    <div class="chip" onclick="setRegion('NORTH_AMERICA', this)">🗽 Сев. Америка</div>
+    <div class="chip" onclick="setRegion('EUROPE', this)">🏛️ Европа</div>
+  </div>
+
+  <!-- Category Filters -->
+  <div class="scroll-row" id="catFilters">
+    <div class="chip active-pink" onclick="setCategory('ALL', this)">✨ Все стили</div>
+    <div class="chip" onclick="setCategory('SOFUBI', this)">👾 Софуби (Sofubi)</div>
+    <div class="chip" onclick="setCategory('VINYL', this)">🧸 Urban Vinyl</div>
+    <div class="chip" onclick="setCategory('BLIND_BOX', this)">🎁 Блайндбоксы</div>
+    <div class="chip" onclick="setCategory('RESIN', this)">💎 Смола / Резин</div>
+    <div class="chip" onclick="setCategory('CUSTOM', this)">🎨 Кастом & Арт</div>
+  </div>
+
+  <!-- Quick Toggles -->
+  <div class="scroll-row">
+    <div class="chip" id="favToggle" onclick="toggleFavFilter()">❤️ Только избранное</div>
+    <div class="chip" id="tripsToggle" onclick="toggleTripsFilter()">🎟️ Мои поездки</div>
+    <span style="font-size: 11px; color: var(--text-muted); align-self: center; margin-left: auto; padding-right: 8px;" id="countBadge">12 событий</span>
+  </div>
+
+  <!-- Main View Container -->
+  <main id="mainContainer">
+    <div class="cards-container" id="cardsList"></div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="navExpos" onclick="switchTab('expos')">
+      <div class="nav-icon">📅</div>
+      <div>Выставки</div>
+    </div>
+    <div class="nav-item" id="navDrops" onclick="switchTab('drops')">
+      <div class="nav-icon">🎯</div>
+      <div>Дропы</div>
+    </div>
+    <div class="nav-item" id="navCities" onclick="switchTab('cities')">
+      <div class="nav-icon">📍</div>
+      <div>Города</div>
+    </div>
+    <div class="nav-item" id="navTrips" onclick="switchTab('trips')">
+      <div class="nav-icon">🎒</div>
+      <div>Поездки</div>
+    </div>
+  </nav>
+
+  <!-- Detail Modal -->
+  <div class="modal" id="detailModal">
+    <div class="modal-sheet" id="modalContent"></div>
+  </div>
+
+  <!-- Add Custom Expo Modal -->
+  <div class="modal" id="addExpoModal">
+    <div class="modal-sheet">
+      <button class="close-btn" onclick="closeModal('addExpoModal')">✕</button>
+      <h3 style="margin-bottom:12px; color:#fff;">Добавить выставку / поп-ап</h3>
+      <input type="text" id="addName" class="search-input" style="padding-left:14px; margin-bottom:8px;" placeholder="Название выставки *">
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <input type="text" id="addCity" class="search-input" style="padding-left:14px;" placeholder="Город *">
+        <input type="text" id="addCountry" class="search-input" style="padding-left:14px;" placeholder="Страна">
+      </div>
+      <input type="text" id="addVenue" class="search-input" style="padding-left:14px; margin-bottom:8px;" placeholder="Локация / Галерея">
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <input type="text" id="addStartDate" class="search-input" style="padding-left:14px;" placeholder="Начало (ГГГГ-ММ-ДД)">
+        <input type="text" id="addEndDate" class="search-input" style="padding-left:14px;" placeholder="Конец (ГГГГ-ММ-ДД)">
+      </div>
+      <select id="addCategory" class="search-input" style="padding-left:14px; margin-bottom:8px;">
+        <option value="VINYL">🧸 Urban Vinyl</option>
+        <option value="SOFUBI">👾 Софуби (Sofubi)</option>
+        <option value="BLIND_BOX">🎁 Блайндбоксы</option>
+        <option value="RESIN">💎 Смола / Резин</option>
+        <option value="CUSTOM">🎨 Кастом & Арт</option>
+      </select>
+      <input type="text" id="addArtists" class="search-input" style="padding-left:14px; margin-bottom:8px;" placeholder="Художники (через запятую)">
+      <textarea id="addDesc" class="search-input" style="padding-left:14px; margin-bottom:8px; height:70px;" placeholder="Описание события"></textarea>
+      <button class="btn" onclick="saveCustomExpo()">Сохранить событие 🎉</button>
+    </div>
+  </div>
+
+  <script>
+    // Curated Exhibitions Data
+    const CURATED_EXPOS = [
+      {
+        id: "dcon_2026",
+        name: "DesignerCon (D-Con)",
+        edition: "2026",
+        city: "Анахайм, Калифорния",
+        country: "США",
+        region: "NORTH_AMERICA",
+        venue: "Anaheim Convention Center, Hall D",
+        startDate: "2026-11-20",
+        endDate: "2026-11-22",
+        displayDates: "20 – 22 ноября 2026",
+        category: "VINYL",
+        catName: "🧸 Urban Vinyl",
+        description: "Крупнейший в США конвент городского винила, поп-сюрреализма и арт-игрушек. Сотни инди-художников, кастомные выставки Dunny, вручение Designer Toy Awards.",
+        ticketInfo: "Билеты: 1-Day Pass $35, Weekend $65, VIP Early Access $110",
+        ticketUrl: "https://www.designercon.com",
+        featuredArtists: ["Ron English", "Gary Baseman", "Tara McPherson", "Mark Ryden", "Tristan Eaton"],
+        featuredBrands: ["Kidrobot", "Superplastic", "Clutter Magazine", "3DRetro"],
+        raffleTips: "VIP-браслет дает вход на 2 часа раньше открытия в пятницу. Лотереи на стендах Kidrobot и Superplastic стартуют ровно в 10:00 утра."
+      },
+      {
+        id: "wonfes_winter_2027",
+        name: "Wonder Festival (WonFes Winter)",
+        edition: "Зима 2027",
+        city: "Тиба / Токио",
+        country: "Япония",
+        region: "ASIA",
+        venue: "Makuhari Messe, Залы 1–8",
+        startDate: "2027-02-07",
+        endDate: "2027-02-08",
+        displayDates: "7 – 8 февраля 2027",
+        category: "SOFUBI",
+        catName: "👾 Софуби",
+        description: "Самый легендарный мировой фестиваль гараж-китов, софуби и независимых скульпторов. Уникальная лицензия 'One-Day Copyright' позволяет авторам продавать штучные работы.",
+        ticketInfo: "Входной билет ~3,000 JPY (~$20). Direct Pass ~6,000 JPY",
+        ticketUrl: "https://wonfes.jp",
+        featuredArtists: ["Shoko Nakazawa", "T9G", "Paul Kaiju", "Konatsu", "Izumonster"],
+        featuredBrands: ["Kaiyodo", "Good Smile Company", "Max Factory", "Medicom Toy"],
+        raffleTips: "На инди-софуби стендах очереди формируются строго по лотерейным номеркам (Ticket Lotto) до 10:30. Готовьте наличные иены!"
+      },
+      {
+        id: "pts_singapore_2026",
+        name: "Pop Toy Show (PTS)",
+        edition: "Сингапур 2026",
+        city: "Сингапур",
+        country: "Сингапур",
+        region: "ASIA",
+        venue: "Marina Bay Sands Expo",
+        startDate: "2026-11-13",
+        endDate: "2026-11-15",
+        displayDates: "13 – 15 ноября 2026",
+        category: "BLIND_BOX",
+        catName: "🎁 Блайндбоксы",
+        description: "Флагманский азиатский фестиваль арт-игрушек от POP MART. Огромные инсталляции, автограф-сессии с авторами Labubu, Skullpanda и Dimoo, эксклюзивы Mega Collection 1000%.",
+        ticketInfo: "Стандартный 32 SGD. VIP 3-Day Pass 168 SGD",
+        ticketUrl: "https://poptoyshow.sg",
+        featuredArtists: ["Kasing Lung (Labubu)", "Kenny Wong (Molly)", "Skullpanda", "Ayan Deng (Dimoo)"],
+        featuredBrands: ["POP MART", "52TOYS", "Finding Unicorn", "TNT Space"],
+        raffleTips: "Лотерея на эксклюзивные фигурки Mega Space Molly и Skullpanda проходит в приложении POP MART за 10 дней до открытия выставки."
+      },
+      {
+        id: "sts_shanghai_2027",
+        name: "Shanghai Toy Show (STS)",
+        edition: "Шанхай 2027",
+        city: "Шанхай",
+        country: "Китай",
+        region: "ASIA",
+        venue: "Shanghai World Expo Center",
+        startDate: "2027-04-16",
+        endDate: "2027-04-18",
+        displayDates: "16 – 18 апреля 2027",
+        category: "VINYL",
+        catName: "🧸 Urban Vinyl",
+        description: "Главная выставка дизайнерских игрушек в континентальном Китае (20 000 кв.м). Эпицентр мировых арт-релизов, коллабораций и гигантских виниловых скульптур.",
+        ticketInfo: "Билеты по регистрации в WeChat Mini-program (120 CNY)",
+        ticketUrl: "https://www.popmart.com",
+        featuredArtists: ["Michael Lau", "Eric So", "Pucky", "Coarse", "Chino Lam"],
+        featuredBrands: ["POP MART", "Medicom Toy", "Soap Studio", "Black Seed"],
+        raffleTips: "Необходим аккаунт WeChat с верификацией для участия в онлайновых розыгрышах дропов."
+      },
+      {
+        id: "tte_bangkok_2027",
+        name: "Thailand Toy Expo (TTE)",
+        edition: "Бангкок 2027",
+        city: "Бангкок",
+        country: "Таиланд",
+        region: "ASIA",
+        venue: "CentralWorld Mall",
+        startDate: "2027-04-22",
+        endDate: "2027-04-25",
+        displayDates: "22 – 25 апреля 2027",
+        category: "RESIN",
+        catName: "💎 Смола / Резин",
+        description: "Уникальная выставка с БЕСПЛАТНЫМ входом в крупнейшем молле Бангкока. Более 300 авторов, огромные арт-инсталляции и релизы Coarse и JPX.",
+        ticketInfo: "Вход свободный (Free Entry)!",
+        ticketUrl: "https://www.thailandtoyexpo.com",
+        featuredArtists: ["Coarse (Mark & Sven)", "Fools Paradise", "Quiccs (TEQ63)", "Greenie & Elfie"],
+        featuredBrands: ["Coarse", "Fools Paradise", "JPX Toys", "Mighty Jaxx"],
+        raffleTips: "Приходите к CentralWorld к 6:00 утра за карточками очереди на релизы Coarse и Fools Paradise."
+      },
+      {
+        id: "ttf_taipei_2026",
+        name: "Taipei Toy Festival (TTF)",
+        edition: "Тайбэй 2026",
+        city: "Тайбэй",
+        country: "Тайвань",
+        region: "ASIA",
+        venue: "Huashan 1914 Creative Park",
+        startDate: "2026-10-15",
+        endDate: "2026-10-18",
+        displayDates: "15 – 18 октября 2026",
+        category: "SOFUBI",
+        catName: "👾 Софуби",
+        description: "Историческая выставка в живописном креативном парке Хуашань. Родина классического азиатского софуби, кайдзю и тайваньской инди-иллюстрации.",
+        ticketInfo: "Билет 350 TWD (~$11)",
+        ticketUrl: "https://www.taipeitoyfestival.com",
+        featuredArtists: ["Shoko Nakazawa (Byron)", "T9G", "Kasing Lung", "INSTINCTOY"],
+        featuredBrands: ["Monster Taipei", "How2work", "Medicom Toy"],
+        raffleTips: "Многие японские мастера софуби разыгрывают право покупки через бумажные купоны прямо на стенде в полдень."
+      },
+      {
+        id: "five_points_2027",
+        name: "Five Points Festival",
+        edition: "Бруклин 2027",
+        city: "Бруклин, Нью-Йорк",
+        country: "США",
+        region: "NORTH_AMERICA",
+        venue: "ZeroSpace Brooklyn",
+        startDate: "2027-05-29",
+        endDate: "2027-05-30",
+        displayDates: "29 – 30 мая 2027",
+        category: "CUSTOM",
+        catName: "🎨 Кастом & Арт",
+        description: "Праздник уличной культуры, винила, граффити и крафтового пива. Здесь чествуют победителей Designer Toy Awards (DTA).",
+        ticketInfo: "General Admission $45, VIP Ticket $130",
+        ticketUrl: "https://www.fivepointsfest.com",
+        featuredArtists: ["Czee13", "Quiccs", "Ron English", "Martian Toys Roster"],
+        featuredBrands: ["Clutter Studios", "Tenacious Toys", "Kidrobot"],
+        raffleTips: "VIP-билет включает эксклюзивную коллекционную фигурку фестиваля и доступ на церемонию DTA."
+      },
+      {
+        id: "toy_art_uk_2026",
+        name: "Toy Art UK",
+        edition: "2026",
+        city: "Лидс",
+        country: "Великобритания",
+        region: "EUROPE",
+        venue: "Leeds City Museum",
+        startDate: "2026-10-24",
+        endDate: "2026-10-25",
+        displayDates: "24 – 25 октября 2026",
+        category: "RESIN",
+        catName: "💎 Смола / Резин",
+        description: "Главная европейская витрина инди-тоймейкеров, скульпторов по смоле, плюшевого арта и платформенных кастомов.",
+        ticketInfo: "Билеты от £12",
+        ticketUrl: "https://www.toyart.co.uk",
+        featuredArtists: ["Pete Fowler", "Doktor A", "Czee13", "Uncle Absinthe"],
+        featuredBrands: ["Toy Art Collective", "Unbox Industries Europe"],
+        raffleTips: "Розыгрыш кастомных фигурок 'Toy Art UK Charity Raffle' проходит в 15:00 каждый день."
+      }
+    ];
+
+    const CURATED_DROPS = [
+      { id: 1, expoId: "pts_singapore_2026", name: "Mega Space Molly 1000% Cyber Neon", brand: "POP MART x Kenny Wong", limit: "Лимит 200 экз.", price: "$980", type: "Лотерея в приложении PTS", grail: true },
+      { id: 2, expoId: "pts_singapore_2026", name: "Labubu The Monsters Vinyl Sculpture", brand: "Kasing Lung x How2work", limit: "Лимит 150 экз.", price: "$280", type: "Очередь по браслетам", grail: true },
+      { id: 3, expoId: "wonfes_winter_2027", name: "Byron x Rangeas Galactic Sofubi Duo", brand: "Shoko Nakazawa & T9G", limit: "Лимит 50 сетов", price: "¥28,000 (~$185)", type: "Lotto Gacha на стенде", grail: true },
+      { id: 4, expoId: "dcon_2026", name: "Grin Vinyl Figure 12\" Metallic Pink", brand: "Ron English x Popaganda", limit: "Лимит 100 экз.", price: "$220", type: "VIP Early Access", grail: false },
+      { id: 5, expoId: "tte_bangkok_2027", name: "Coarse Noop & Paw: Bangkok Glow", brand: "Coarse Toys (Mark & Sven)", limit: "Лимит 250 экз.", price: "8,500 THB (~$230)", type: "Eden Square Очередь", grail: true },
+      { id: 6, expoId: "five_points_2027", name: "Canbot 5oz Brooklyn Street Rust", brand: "Czee13 x Clutter", limit: "Лимит 75 экз.", price: "$95", type: "Стенд Clutter Studios", grail: false }
+    ];
+
+    const CITIES_DATA = [
+      { flag: "🇯🇵", city: "Токио & Тиба", country: "Япония", vibe: "Мировая столица софуби, кайдзю и гараж-китов", spots: "Nakano Broadway (Мандараке), Akihabara Radio Kaikan, Harajuku (Secret Base)", expos: ["Wonder Festival WonFes", "Tokyo Comic Con Sofubi"] },
+      { flag: "🇹🇭", city: "Бангкок", country: "Таиланд", vibe: "Эпицентр азиатского смоляного и винилового арт-тоя", spots: "CentralWorld (TTE), Mega Plaza Saphan Lek, Siam Paragon", expos: ["Thailand Toy Expo (TTE)"] },
+      { flag: "🇨🇳", city: "Шанхай", country: "Китай", vibe: "Мегаполис блайндбоксов, флагманов POP MART и масштабных статуй", spots: "Nanjing East Road Pop Mart Global, TX Huaihai Youth Energy", expos: ["Shanghai Toy Show (STS)"] },
+      { flag: "🇺🇸", city: "Анахайм & Лос-Анджелес", country: "США", vibe: "Родина урбан-винила, поп-сюрреализма и наград Designer Toy Awards", spots: "Melrose Avenue, Little Tokyo (Giant Robot), Arts District", expos: ["DesignerCon (D-Con)", "ComplexCon"] },
+      { flag: "🇹🇼", city: "Тайбэй", country: "Тайвань", vibe: "Классический независимый арт-той в креативных парках", spots: "Huashan 1914 Creative Park, Songshan Cultural Park", expos: ["Taipei Toy Festival (TTF)"] },
+      { flag: "🇸🇬", city: "Сингапур", country: "Сингапур", vibe: "Футуристичный хаб с эксклюзивами Mega Space Molly и Mighty Jaxx", spots: "Marina Bay Sands Expo, Funan Mall (ActionCity)", expos: ["Pop Toy Show (PTS)"] }
+    ];
+
+    // State
+    let currentTab = 'expos';
+    let selectedRegion = 'ALL';
+    let selectedCategory = 'ALL';
+    let filterFavoritesOnly = false;
+    let filterTripsOnly = false;
+    let favorites = JSON.parse(localStorage.getItem('toy_favs') || '["dcon_2026","wonfes_winter_2027"]');
+    let attendances = JSON.parse(localStorage.getItem('toy_attendance') || '{"dcon_2026":"GOING","pts_singapore_2026":"INTERESTED"}');
+    let customExpos = JSON.parse(localStorage.getItem('toy_custom_expos') || '[]');
+    let customDrops = JSON.parse(localStorage.getItem('toy_custom_drops') || '[]');
+
+    // Telegram Web App Initialization
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      try {
+        tg.ready();
+        tg.expand();
+        if (tg.enableClosingConfirmation) tg.enableClosingConfirmation();
+        if (tg.setHeaderColor) tg.setHeaderColor('#0A0C14');
+        if (tg.setBackgroundColor) tg.setBackgroundColor('#0A0C14');
+
+        const user = tg.initDataUnsafe?.user;
+        const tgBar = document.getElementById('tgUserBar');
+        if (tgBar) {
+          tgBar.style.display = 'flex';
+          if (user) {
+            const userName = user.first_name || user.username || 'Коллекционер';
+            document.getElementById('tgUserName').textContent = `Привет, ${userName}! 👾`;
+          }
+        }
+
+        // Native BackButton handler
+        if (tg.BackButton) {
+          tg.BackButton.onClick(() => {
+            closeModal('detailModal');
+            closeModal('addExpoModal');
+          });
+        }
+
+        // Cloud Storage sync
+        if (tg.CloudStorage) {
+          tg.CloudStorage.getItem('toy_favs', (err, val) => {
+            if (!err && val) {
+              try { favorites = JSON.parse(val); renderApp(); } catch (e) {}
+            }
+          });
+          tg.CloudStorage.getItem('toy_attendance', (err, val) => {
+            if (!err && val) {
+              try { attendances = JSON.parse(val); renderApp(); } catch (e) {}
+            }
+          });
+        }
+      } catch (e) {
+        console.log('[TMA] Init notice:', e);
+      }
+    }
+
+    function triggerHaptic(type = 'light') {
+      try {
+        if (tg && tg.HapticFeedback) {
+          if (type === 'selection') tg.HapticFeedback.selectionChanged();
+          else if (type === 'success' || type === 'error' || type === 'warning') tg.HapticFeedback.notificationOccurred(type);
+          else tg.HapticFeedback.impactOccurred(type);
+        }
+      } catch (e) {}
+    }
+
+    function getAllExpos() {
+      return [...CURATED_EXPOS, ...customExpos].sort((a,b) => a.startDate.localeCompare(b.startDate));
+    }
+    function getAllDrops() {
+      return [...CURATED_DROPS, ...customDrops];
+    }
+
+    function calculateDays(startDate) {
+      const target = new Date(startDate);
+      const now = new Date();
+      const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+      return diff < 0 ? 0 : diff;
+    }
+
+    // Countdown Timer for Hero
+    function updateCountdown() {
+      const next = getAllExpos()[0];
+      if (!next) return;
+      const target = new Date(next.startDate + "T10:00:00").getTime();
+      const now = new Date().getTime();
+      const diff = target - now;
+      if (diff > 0) {
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / (1000 * 60)) % 60);
+        const s = Math.floor((diff / 1000) % 60);
+        document.getElementById('dDays').textContent = d;
+        document.getElementById('dHours').textContent = String(h).padStart(2,'0');
+        document.getElementById('dMins').textContent = String(m).padStart(2,'0');
+        document.getElementById('dSecs').textContent = String(s).padStart(2,'0');
+      }
+    }
+    setInterval(updateCountdown, 1000);
+
+    // Switch Tabs
+    function switchTab(tab) {
+      triggerHaptic('light');
+      currentTab = tab;
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'active-yellow', 'active-cyan'));
+      if (tab === 'expos') document.getElementById('navExpos').classList.add('active');
+      if (tab === 'drops') document.getElementById('navDrops').classList.add('active-yellow');
+      if (tab === 'cities') document.getElementById('navCities').classList.add('active-cyan');
+      if (tab === 'trips') document.getElementById('navTrips').classList.add('active');
+      renderApp();
+    }
+
+    function setRegion(reg, el) {
+      triggerHaptic('selection');
+      selectedRegion = reg;
+      document.querySelectorAll('#regionFilters .chip').forEach(c => c.classList.remove('active-cyan'));
+      el.classList.add('active-cyan');
+      renderApp();
+    }
+    function setCategory(cat, el) {
+      triggerHaptic('selection');
+      selectedCategory = cat;
+      document.querySelectorAll('#catFilters .chip').forEach(c => c.classList.remove('active-pink'));
+      el.classList.add('active-pink');
+      renderApp();
+    }
+    function toggleFavFilter() {
+      triggerHaptic('selection');
+      filterFavoritesOnly = !filterFavoritesOnly;
+      document.getElementById('favToggle').classList.toggle('active-pink', filterFavoritesOnly);
+      renderApp();
+    }
+    function toggleTripsFilter() {
+      triggerHaptic('selection');
+      filterTripsOnly = !filterTripsOnly;
+      document.getElementById('tripsToggle').classList.toggle('active-yellow', filterTripsOnly);
+      renderApp();
+    }
+
+    function toggleFavorite(id, e) {
+      if (e) e.stopPropagation();
+      triggerHaptic('selection');
+      if (favorites.includes(id)) {
+        favorites = favorites.filter(x => x !== id);
+      } else {
+        favorites.push(id);
+      }
+      localStorage.setItem('toy_favs', JSON.stringify(favorites));
+      if (tg && tg.CloudStorage) {
+        tg.CloudStorage.setItem('toy_favs', JSON.stringify(favorites));
+      }
+      renderApp();
+    }
+
+    function renderApp() {
+      const container = document.getElementById('mainContainer');
+      const search = (document.getElementById('searchInput').value || '').toLowerCase();
+
+      if (currentTab === 'expos') {
+        let expos = getAllExpos().filter(e => {
+          const matchReg = selectedRegion === 'ALL' || e.region === selectedRegion;
+          const matchCat = selectedCategory === 'ALL' || e.category === selectedCategory;
+          const matchSearch = !search || e.name.toLowerCase().includes(search) || e.city.toLowerCase().includes(search) || (e.featuredArtists && e.featuredArtists.some(a => a.toLowerCase().includes(search)));
+          const matchFav = !filterFavoritesOnly || favorites.includes(e.id);
+          const matchTrip = !filterTripsOnly || !!attendances[e.id];
+          return matchReg && matchCat && matchSearch && matchFav && matchTrip;
+        });
+
+        document.getElementById('countBadge').textContent = `${expos.length} событий`;
+
+        let html = '<div class="cards-container">';
+        if (expos.length === 0) {
+          html += '<div style="text-align:center; padding:40px 20px; color:var(--text-muted);"><div style="font-size:40px;">🧸</div><div style="font-weight:700; margin-top:8px;">Выставки не найдены</div><div>Попробуйте сбросить фильтры</div></div>';
+        } else {
+          expos.forEach(e => {
+            const days = calculateDays(e.startDate);
+            const isFav = favorites.includes(e.id);
+            const att = attendances[e.id];
+            let badgeClass = days === 0 ? 'now' : days <= 14 ? 'soon' : 'normal';
+            let badgeText = days === 0 ? 'ИДЕТ СЕЙЧАС 🔥' : `Через ${days} дн.`;
+
+            html += `
+              <div class="expo-card ${isFav ? 'favorite' : ''}" onclick="openExpoDetail('${e.id}')">
+                <div class="expo-card-top">
+                  <div class="cat-pill">${e.catName || '🧸 Urban Vinyl'}</div>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <div class="days-badge ${badgeClass}">${badgeText}</div>
+                    <button class="fav-btn" onclick="toggleFavorite('${e.id}', event)">${isFav ? '❤️' : '🤍'}</button>
+                  </div>
+                </div>
+                <div class="expo-title">${e.name}</div>
+                <div class="expo-edition">${e.edition || ''}</div>
+                <div class="expo-info-line"><span>📅</span><span>${e.displayDates}</span></div>
+                <div class="expo-info-line"><span>📍</span><span>${e.city}, ${e.country}</span></div>
+                <div class="expo-desc">${e.description}</div>
+                ${e.featuredArtists ? `<div class="artists-tags">${e.featuredArtists.slice(0,3).map(a => `<span class="artist-tag">👤 ${a}</span>`).join('')}</div>` : ''}
+                ${att ? `<div style="margin-top:10px; background:rgba(255,42,109,0.12); border:1px solid var(--pink); border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700;">${att === 'GOING' ? '🎟️ Точно иду' : '⭐ В вишлисте'}</div>` : ''}
+              </div>
+            `;
+          });
+        }
+        html += '</div>';
+        container.innerHTML = html;
+      }
+
+      else if (currentTab === 'drops') {
+        const drops = getAllDrops();
+        let html = '<div class="cards-container"><h2 style="font-size:20px; font-weight:800; color:var(--yellow);">Радар эксклюзивных релизов 🎯</h2><div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Лимитированные виниловые фигурки и лотереи</div>';
+        drops.forEach(d => {
+          html += `
+            <div class="drop-item-card ${d.grail ? 'grail' : ''}">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                ${d.grail ? '<span style="background:var(--yellow); color:#000; font-size:10px; font-weight:800; padding:2px 8px; border-radius:100px;">🎯 СВЯЩЕННЫЙ ГРААЛЬ</span>' : '<span style="color:var(--cyan); font-size:11px; font-weight:700;">✨ Эксклюзив</span>'}
+                <span style="font-size:14px; font-weight:800; color:var(--yellow);">${d.price}</span>
+              </div>
+              <div style="font-size:16px; font-weight:800; color:#fff;">${d.name}</div>
+              <div style="font-size:13px; color:var(--cyan); margin:3px 0;">${d.brand}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${d.limit} • ${d.type}</div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      }
+
+      else if (currentTab === 'cities') {
+        let html = '<div class="cards-container"><h2 style="font-size:20px; font-weight:800; color:#fff;">Столицы Design Toy 🌍</h2><div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Путеводитель по культовым районам и конвентам</div>';
+        CITIES_DATA.forEach(c => {
+          html += `
+            <div class="expo-card" style="cursor:default;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                <span style="font-size:24px;">${c.flag}</span>
+                <div>
+                  <div style="font-size:17px; font-weight:800; color:#fff;">${c.city}</div>
+                  <div style="font-size:12px; color:var(--cyan); font-weight:700;">${c.country}</div>
+                </div>
+              </div>
+              <div style="font-size:13px; color:var(--yellow); font-weight:700; margin-bottom:6px;">${c.vibe}</div>
+              <div style="font-size:12px; color:var(--text-muted); line-height:1.4;"><b>Где искать винил:</b> ${c.spots}</div>
+              <div style="margin-top:10px; font-size:12px; font-weight:700;">События: ${c.expos.map(x => `<span style="background:var(--surface-elevated); padding:3px 8px; border-radius:6px; margin-right:4px;">${x}</span>`).join('')}</div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      }
+
+      else if (currentTab === 'trips') {
+        const tracked = getAllExpos().filter(e => !!attendances[e.id] || favorites.includes(e.id));
+        let html = '<div class="cards-container"><h2 style="font-size:20px; font-weight:800; color:#fff;">Мои поездки и вишлист 🎒</h2><div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Сохраненные конвенты и подготовка</div>';
+        if (tracked.length === 0) {
+          html += '<div style="text-align:center; padding:40px; color:var(--text-muted);"><div style="font-size:40px;">🎟️</div><div>Вы пока не запланировали поездки</div></div>';
+        } else {
+          tracked.forEach(e => {
+            html += `
+              <div class="expo-card" onclick="openExpoDetail('${e.id}')">
+                <div style="font-size:16px; font-weight:800; color:#fff;">${e.name}</div>
+                <div style="font-size:12px; color:var(--cyan);">${e.displayDates} • ${e.city}</div>
+                <div style="margin-top:8px; font-size:12px; color:var(--yellow);">Статус: ${attendances[e.id] === 'GOING' ? '🎟️ Точно иду' : '⭐ В вишлисте'}</div>
+              </div>
+            `;
+          });
+        }
+        html += '</div>';
+        container.innerHTML = html;
+      }
+    }
+
+    function openExpoDetail(id) {
+      triggerHaptic('medium');
+      const expo = getAllExpos().find(x => x.id === id);
+      if (!expo) return;
+      const isFav = favorites.includes(expo.id);
+      const att = attendances[expo.id] || 'NONE';
+      const drops = getAllDrops().filter(d => d.expoId === expo.id);
+
+      const html = `
+        <button class="close-btn" onclick="closeModal('detailModal')">✕</button>
+        <div style="font-size:11px; font-weight:700; color:var(--cyan);">${expo.catName || '🧸 Urban Vinyl'}</div>
+        <h2 style="font-size:22px; font-weight:800; color:#fff; margin-top:4px;">${expo.name}</h2>
+        <div style="font-size:14px; color:var(--pink); font-weight:700; margin-bottom:12px;">${expo.edition || ''}</div>
+
+        <div style="background:var(--surface-elevated); padding:12px; border-radius:14px; margin-bottom:14px;">
+          <div class="expo-info-line"><span>📅</span><span>${expo.displayDates}</span></div>
+          <div class="expo-info-line"><span>📍</span><span>${expo.city}, ${expo.country}</span></div>
+          <div class="expo-info-line"><span>🏛️</span><span>${expo.venue}</span></div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; gap:8px;">
+            <a href="https://maps.google.com/?q=${encodeURIComponent(expo.name + ' ' + expo.venue)}" target="_blank" class="btn btn-secondary">📍 На карте</a>
+            ${expo.ticketUrl ? `<a href="${expo.ticketUrl}" target="_blank" class="btn">Билеты / Сайт ➔</a>` : ''}
+          </div>
+          <button class="btn" style="background:#2AABEE; color:#fff; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="shareExpoInTelegram('${expo.id}')">
+            <span>✈️</span> Поделиться событием в Telegram
+          </button>
+        </div>
+
+        <div style="margin-top:16px; font-size:13px; color:var(--text); line-height:1.5;">${expo.description}</div>
+
+        <div class="guide-box">
+          <div style="font-weight:800; color:var(--yellow); margin-bottom:4px;">⚡ Гайд по лотереям и очередям</div>
+          <div>${expo.raffleTips}</div>
+        </div>
+
+        ${expo.featuredArtists ? `
+          <div style="margin-top:12px;">
+            <div style="font-size:12px; font-weight:700; color:var(--cyan); margin-bottom:6px;">Художники и бренды:</div>
+            <div class="artists-tags">${expo.featuredArtists.map(a => `<span class="artist-tag">👤 ${a}</span>`).join('')}</div>
+          </div>
+        ` : ''}
+
+        <div style="margin-top:18px;">
+          <div style="font-size:14px; font-weight:800; color:#fff; margin-bottom:8px;">Мой статус посещения:</div>
+          <div style="display:flex; gap:6px;">
+            <button class="chip ${att==='GOING'?'active-pink':''}" onclick="setAttendance('${expo.id}', 'GOING')">🎟️ Иду</button>
+            <button class="chip ${att==='INTERESTED'?'active-yellow':''}" onclick="setAttendance('${expo.id}', 'INTERESTED')">⭐ В вишлист</button>
+            <button class="chip ${att==='NONE'?'active-cyan':''}" onclick="setAttendance('${expo.id}', 'NONE')">Снять</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('detailModal').classList.add('open');
+      if (tg && tg.BackButton) tg.BackButton.show();
+    }
+
+    function openHeroDetails() {
+      const next = getAllExpos()[0];
+      if (next) openExpoDetail(next.id);
+    }
+    function closeModal(modalId) {
+      triggerHaptic('light');
+      document.getElementById(modalId).classList.remove('open');
+      if (tg && tg.BackButton) tg.BackButton.hide();
+    }
+    function openAddExpoModal() {
+      triggerHaptic('light');
+      document.getElementById('addExpoModal').classList.add('open');
+      if (tg && tg.BackButton) tg.BackButton.show();
+    }
+    function setAttendance(id, status) {
+      triggerHaptic('success');
+      if (status === 'NONE') delete attendances[id];
+      else attendances[id] = status;
+      localStorage.setItem('toy_attendance', JSON.stringify(attendances));
+      if (tg && tg.CloudStorage) {
+        tg.CloudStorage.setItem('toy_attendance', JSON.stringify(attendances));
+      }
+      closeModal('detailModal');
+      renderApp();
+    }
+    function shareExpoInTelegram(id) {
+      triggerHaptic('medium');
+      const expo = getAllExpos().find(x => x.id === id);
+      if (!expo) return;
+      const shareText = `👾 Выставка дизайнерских игрушек:\n🔥 ${expo.name} (${expo.edition || ''})\n📅 ${expo.displayDates}\n📍 ${expo.city}, ${expo.venue}\n\nСмотри календарь выставок в ToyExpo Mini App!`;
+      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.origin)}&text=${encodeURIComponent(shareText)}`;
+      if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(shareUrl);
+      } else {
+        window.open(shareUrl, '_blank');
+      }
+    }
+    function saveCustomExpo() {
+      const name = document.getElementById('addName').value;
+      const city = document.getElementById('addCity').value;
+      if (!name || !city) return alert('Пожалуйста, введите название и город');
+      const newExpo = {
+        id: 'cust_' + Date.now(),
+        name: name,
+        city: city,
+        country: document.getElementById('addCountry').value || 'Земля',
+        venue: document.getElementById('addVenue').value || 'Арт-галерея',
+        startDate: document.getElementById('addStartDate').value || '2026-12-01',
+        endDate: document.getElementById('addEndDate').value || '2026-12-03',
+        displayDates: (document.getElementById('addStartDate').value || '2026-12-01') + ' – ' + (document.getElementById('addEndDate').value || '2026-12-03'),
+        category: document.getElementById('addCategory').value,
+        catName: document.getElementById('addCategory').options[document.getElementById('addCategory').selectedIndex].text,
+        region: 'ASIA',
+        description: document.getElementById('addDesc').value || 'Выставка дизайнерских игрушек.',
+        raffleTips: 'Живая очередь и лотереи на стендах авторов.'
+      };
+      customExpos.push(newExpo);
+      localStorage.setItem('toy_custom_expos', JSON.stringify(customExpos));
+      closeModal('addExpoModal');
+      renderApp();
+    }
+
+    // Init
+    renderApp();
+    updateCountdown();
+  </script>
+</body>
+</html>

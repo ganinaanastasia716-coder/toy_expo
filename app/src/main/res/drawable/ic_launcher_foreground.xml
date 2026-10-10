@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Toy Head Outline -->
+    <path
+        android:fillColor="#FF2A6D"
+        android:pathData="M34,42 C34,32 44,24 54,24 C64,24 74,32 74,42 C74,56 68,68 54,68 C40,68 34,56 34,42 Z" />
+    <!-- Toy Ears/Horns -->
+    <path
+        android:fillColor="#05D9E8"
+        android:pathData="M36,32 L26,20 L38,24 Z M72,32 L82,20 L70,24 Z" />
+    <!-- Cyber Visor / Glasses -->
+    <path
+        android:fillColor="#D1F200"
+        android:pathData="M38,40 L70,40 C72,40 72,48 70,48 L38,48 C36,48 36,40 38,40 Z" />
+    <!-- Toy Body/Pedestal -->
+    <path
+        android:fillColor="#1B2032"
+        android:pathData="M42,68 L66,68 L70,84 L38,84 Z" />
+    <!-- Chest Tag -->
+    <path
+        android:fillColor="#FF2A6D"
+        android:pathData="M48,72 L60,72 L60,78 L48,78 Z" />
+</vector>

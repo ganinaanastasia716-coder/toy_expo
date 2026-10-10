@@ -1,0 +1,19 @@
+{
+  "name": "toyexpo-telegram-miniapp",
+  "version": "1.0.0",
+  "description": "ToyExpo - Telegram Mini App & Telegram Bot for Design Toy Exhibitions and Rare Drops",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "telegram",
+    "telegram-mini-app",
+    "telegram-bot",
+    "design-toy",
+    "urban-vinyl",
+    "sofubi"
+  ],
+  "author": "ToyExpo",
+  "license": "MIT"
+}
